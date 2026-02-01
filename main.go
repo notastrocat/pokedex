@@ -23,6 +23,11 @@ func init() {
             description: "Displays a list of locations, 20 at a time.",
             callback:    commandMap,
         },
+        "mapb": {
+            name:        "mapb",
+            description: "Displays the previous 20 locations.",
+            callback:    commandMapBack,
+        },
 	}
 }
 

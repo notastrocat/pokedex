@@ -37,12 +37,27 @@ func commandHelp() error {
 
 func commandMap() error {
     // call the func that handles the API call to get the Location Areas...
-    locationAreas, err := pokeapi.GetLocationAreas()
+    locationAreas, err := pokeapi.GetLocationAreas(pokeapi.FORWARD)
     if err != nil {
         return err
     }
 
-    fmt.Println("Location Areas:")
+    // fmt.Println("Location Areas:")
+    for _, area := range locationAreas {
+        fmt.Printf("%s\n", area.Name)
+    }
+
+    return nil
+}
+
+func commandMapBack() error {
+    // call the func that handles the API call to get the previous Location Areas...
+    locationAreas, err := pokeapi.GetLocationAreas(pokeapi.BACK)
+    if err != nil {
+        return err
+    }
+
+    // fmt.Println("Previous Location Areas:")
     for _, area := range locationAreas {
         fmt.Printf("%s\n", area.Name)
     }
