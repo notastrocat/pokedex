@@ -13,8 +13,8 @@ type LocationArea struct {
 }
 
 type locationAreaResponse struct {
-	Next     string         `json:"next"`
-	Previous string         `json:"previous"`
+	Next     *string         `json:"next"`
+	Previous *string         `json:"previous"`
 	Results  []LocationArea `json:"results"`
 }
 
@@ -41,9 +41,31 @@ func (cfg *Config) update(next, previous *string) error {
     return nil
 }
 
+const (
+    FORWARD = iota
+    BACK
+)
+
 // Location areas are sections of areas, such as floors in a building or cave. Each area has its own set of possible Pokémon encounters.
-func GetLocationAreas() ([]LocationArea, error) {
-    resp, err := http.Get(*Cfg.Next)
+func GetLocationAreas(direction int) ([]LocationArea, error) {
+	var resp *http.Response
+	var err error
+
+	switch direction {
+	case BACK:
+		if Cfg.Previous == nil {
+			return []LocationArea{}, fmt.Errorf("you're on the first page")
+		}
+		resp, err = http.Get(*Cfg.Previous)
+	case FORWARD:
+		if Cfg.Next == nil {
+			return []LocationArea{}, fmt.Errorf("Congrats! you've reached the last page. Go touch some grass now.")
+		}
+    	resp, err = http.Get(*Cfg.Next)
+	default:
+		return []LocationArea{}, fmt.Errorf("you didn't think this through, did you?")
+	}
+
     if err != nil {
         return []LocationArea{}, fmt.Errorf("failed to get location areas: %w", err)
     }
@@ -63,7 +85,9 @@ func GetLocationAreas() ([]LocationArea, error) {
 		return []LocationArea{}, fmt.Errorf("failed to unmarshal location areas response: %w", err)
 	}
 
-	Cfg.update(&response.Next, &response.Previous)
+	Cfg.update(response.Next, response.Previous)
+	// fmt.Println("Next:", *(Cfg.Next))
+	// fmt.Println("Previous:", *(Cfg.Previous))
 
     return response.Results, nil
 }
