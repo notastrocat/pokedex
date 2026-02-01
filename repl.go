@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+    "pokedex/pokeapi"
 )
 
 func cleanInput(text string) []string {
@@ -34,8 +35,25 @@ func commandHelp() error {
 	return nil
 }
 
+func commandMap() error {
+    // call the func that handles the API call to get the Location Areas...
+    locationAreas, err := pokeapi.GetLocationAreas()
+    if err != nil {
+        return err
+    }
+
+    fmt.Println("Location Areas:")
+    for _, area := range locationAreas {
+        fmt.Printf("%s\n", area.Name)
+    }
+
+    return nil
+}
+
 func repl() {
 	scanner := bufio.NewScanner(os.Stdin)
+
+    pokeapi.NewConfig()
 
 	for {
 		fmt.Print("Pokedex > ")
