@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-    "pokedex/pokeapi"
+    "pokedex/internal/pokeapi"
 )
 
 func cleanInput(text string) []string {
@@ -28,7 +28,7 @@ func commandHelp() error {
 	fmt.Println("Usage:\n")
 
 	for _, cmd := range CommandRegistry {
-		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
+		fmt.Printf("%4s: %s\n", cmd.name, cmd.description)
 	}
     fmt.Println()
 
