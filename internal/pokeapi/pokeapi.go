@@ -26,7 +26,7 @@ type Config struct {
 var Cfg = Config{}
 
 func NewConfig() {
-	initialURL := "https://pokeapi.co/api/v2/location-area/"
+    initialURL := "https://pokeapi.co/api/v2/location-area/"
     Cfg.Next     = &initialURL
     Cfg.Previous = nil
 }
@@ -86,8 +86,6 @@ func GetLocationAreas(direction int) ([]LocationArea, error) {
 	}
 
 	Cfg.update(response.Next, response.Previous)
-	// fmt.Println("Next:", *(Cfg.Next))
-	// fmt.Println("Previous:", *(Cfg.Previous))
 
     return response.Results, nil
 }
