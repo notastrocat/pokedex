@@ -18,6 +18,15 @@ type locationAreaResponse struct {
 	Results  []LocationArea `json:"results"`
 }
 
+type exploreResponse struct {
+	PokemonEncounters []struct {
+		Pokemon struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		}
+	} `json:"pokemon_encounters"`
+}
+
 type Config struct {
 	Next	 *string
 	Previous *string
@@ -88,4 +97,29 @@ func GetLocationAreas(direction int) ([]LocationArea, error) {
 	Cfg.update(response.Next, response.Previous)
 
     return response.Results, nil
+}
+
+func GetPokemonEncounters(locationAreaName string) (exploreResponse, error) {
+	locationAreaURL := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s/", locationAreaName)
+	resp, err := http.Get(locationAreaURL)
+	if err != nil {
+		return exploreResponse{}, fmt.Errorf("failed to get pokemon encounters: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return exploreResponse{}, fmt.Errorf("failed to get pokemon encounters: status code %d", resp.StatusCode)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return exploreResponse{}, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var response exploreResponse
+	if err := json.Unmarshal(data, &response); err != nil {
+		return exploreResponse{}, fmt.Errorf("failed to unmarshal pokemon encounters response: %w", err)
+	}
+
+	return response, nil
 }
