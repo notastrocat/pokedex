@@ -25,7 +25,8 @@ var CommandRegistry map[string]cliCommand
 
 func commandHelp() error {
 	fmt.Println("Welcome to the Pokedex!")
-	fmt.Println("Usage:\n")
+	fmt.Println("Usage:")
+	fmt.Println()
 
 	for _, cmd := range CommandRegistry {
 		fmt.Printf("%4s: %s\n", cmd.name, cmd.description)
