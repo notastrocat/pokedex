@@ -9,11 +9,11 @@ func TestCleanInput(t *testing.T) {
     } {
 		{
 			input: " hello  world  ",
-			expected: []string{"hello", "world"},
+			expected: []string{"hello", "world", ""},
 		},
 		{
 			input: "Test text  ",
-			expected: []string{"test", "text"},
+			expected: []string{"test", "text", ""},
 		},
 		// add more cases here.
     }
@@ -43,11 +43,11 @@ func TestReplCommands(t *testing.T) {
     } {
 		{
 			input: " hello  world  ",
-			expected: []string{"hello", "world"},
+			expected: []string{"hello", "world", ""},
 		},
 		{
 			input: "Test text  ",
-			expected: []string{"test", "text"},
+			expected: []string{"test", "text", ""},
 		},
 		// add more cases here.
     }
