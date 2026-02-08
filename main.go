@@ -3,7 +3,7 @@ package main
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(locationAreaName string) error
 }
 
 func init() {
@@ -28,6 +28,11 @@ func init() {
             description: "Displays the previous 20 locations.",
             callback:    commandMapBack,
         },
+		"explore": {
+			name:        "explore",
+			description: "Explore a location",
+			callback:    commandExplore,
+		},
 	}
 }
 

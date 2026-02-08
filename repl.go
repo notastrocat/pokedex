@@ -11,10 +11,11 @@ import (
 func cleanInput(text string) []string {
 	text = strings.ToLower(text)
 	words := strings.Fields(text)
+	words = append(words, "") // add an empty string to the end of the slice to prevent out-of-range errors when accessing cmd[1]
 	return words
 }
 
-func commandExit() error {
+func commandExit(locationAreaName string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 
@@ -23,7 +24,7 @@ func commandExit() error {
 
 var CommandRegistry map[string]cliCommand
 
-func commandHelp() error {
+func commandHelp(locationAreaName string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	fmt.Println()
@@ -36,7 +37,7 @@ func commandHelp() error {
 	return nil
 }
 
-func commandMap() error {
+func commandMap(locationAreaName string) error {
     // call the func that handles the API call to get the Location Areas...
     locationAreas, err := pokeapi.GetLocationAreas(pokeapi.FORWARD)
     if err != nil {
@@ -51,7 +52,7 @@ func commandMap() error {
     return nil
 }
 
-func commandMapBack() error {
+func commandMapBack(locationAreaName string) error {
     // call the func that handles the API call to get the previous Location Areas...
     locationAreas, err := pokeapi.GetLocationAreas(pokeapi.BACK)
     if err != nil {
@@ -61,6 +62,22 @@ func commandMapBack() error {
     // fmt.Println("Previous Location Areas:")
     for _, area := range locationAreas {
         fmt.Printf("%s\n", area.Name)
+    }
+
+    return nil
+}
+
+func commandExplore(locationAreaName string) error {
+	fmt.Printf("Exploring %s...\n", locationAreaName)
+
+    response, err := pokeapi.GetPokemonEncounters(locationAreaName)
+    if err != nil {
+        return err
+    }
+
+    fmt.Println("Found Pokemon:")
+    for _, encounter := range response.PokemonEncounters {
+        fmt.Printf(" - %s\n", encounter.Pokemon.Name)
     }
 
     return nil
@@ -80,7 +97,7 @@ func repl() {
 			continue
 		}
 		if command, exists := CommandRegistry[cmd[0]]; exists {
-			err := command.callback()
+			err := command.callback(cmd[1])
 			if err != nil {
 				fmt.Println(err)
 			}
