@@ -1,5 +1,11 @@
 package main
 
+import (
+	"time"
+
+	"pokedex/internal/pokecache"
+)
+
 type cliCommand struct {
 	name        string
 	description string
@@ -35,6 +41,13 @@ func init() {
 		},
 	}
 }
+
+type ReplState struct {
+	currentLocationArea string
+}
+
+var LocaleCache = pokecache.NewCache(15 * time.Second)
+var PokemonCache = pokecache.NewCache(15 * time.Second)
 
 func main() {
     repl()
