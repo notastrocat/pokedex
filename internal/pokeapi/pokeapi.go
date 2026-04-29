@@ -1,7 +1,6 @@
 package pokeapi
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,13 +11,13 @@ type LocationArea struct {
 	Url  string `json:"url"`
 }
 
-type locationAreaResponse struct {
+type LocationAreaResponse struct {
 	Next     *string         `json:"next"`
 	Previous *string         `json:"previous"`
 	Results  []LocationArea `json:"results"`
 }
 
-type exploreResponse struct {
+type ExploreResponse struct {
 	PokemonEncounters []struct {
 		Pokemon struct {
 			Name string `json:"name"`
@@ -34,13 +33,15 @@ type Config struct {
 
 var Cfg = Config{}
 
+// Creates a new Config with the initial URL set to the first page of location areas.
 func NewConfig() {
     initialURL := "https://pokeapi.co/api/v2/location-area/"
     Cfg.Next     = &initialURL
     Cfg.Previous = nil
 }
 
-func (cfg *Config) update(next, previous *string) error {
+// Updates the Config with the next and previous URLs from the API response.
+func (cfg *Config) Update(next, previous *string) error {
     if cfg == nil {
         return fmt.Errorf("Failed to update Config; receiver is nil")
     }
@@ -56,70 +57,66 @@ const (
 )
 
 // Location areas are sections of areas, such as floors in a building or cave. Each area has its own set of possible Pokémon encounters.
-func GetLocationAreas(direction int) ([]LocationArea, error) {
+func GetLocationAreas(direction int) ([]byte, error) {
 	var resp *http.Response
 	var err error
 
 	switch direction {
 	case BACK:
 		if Cfg.Previous == nil {
-			return []LocationArea{}, fmt.Errorf("you're on the first page")
+			return []byte{}, fmt.Errorf("you're on the first page")
 		}
 		resp, err = http.Get(*Cfg.Previous)
 	case FORWARD:
 		if Cfg.Next == nil {
-			return []LocationArea{}, fmt.Errorf("Congrats! you've reached the last page. Go touch some grass now.")
+			return []byte{}, fmt.Errorf("Congrats! you've reached the last page. Go touch some grass now.")
 		}
     	resp, err = http.Get(*Cfg.Next)
 	default:
-		return []LocationArea{}, fmt.Errorf("you didn't think this through, did you?")
+		return []byte{}, fmt.Errorf("you didn't think this through, did you?")
 	}
 
     if err != nil {
-        return []LocationArea{}, fmt.Errorf("failed to get location areas: %w", err)
+        return []byte{}, fmt.Errorf("failed to get location areas: %w", err)
     }
     defer resp.Body.Close()
 
     if resp.StatusCode != http.StatusOK {
-        return []LocationArea{}, fmt.Errorf("failed to get location areas: status code %d", resp.StatusCode)
+        return []byte{}, fmt.Errorf("failed to get location areas: status code %d", resp.StatusCode)
     }
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return []LocationArea{}, fmt.Errorf("failed to read response body: %w", err)
+		return []byte{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var response locationAreaResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return []LocationArea{}, fmt.Errorf("failed to unmarshal location areas response: %w", err)
-	}
+	// var response locationAreaResponse
+	// if err := json.Unmarshal(data, &response); err != nil {
+	// 	return []LocationArea{}, fmt.Errorf("failed to unmarshal location areas response: %w", err)
+	// }
 
-	Cfg.update(response.Next, response.Previous)
+	// pokeapi.Cfg.Update(response.Next, response.Previous)
 
-    return response.Results, nil
+    return data, nil
 }
 
-func GetPokemonEncounters(locationAreaName string) (exploreResponse, error) {
+// GetPokemonEncounters retrieves the list of Pokémon encounters for a given location area name.
+func GetPokemonEncounters(locationAreaName string) ([]byte, error) {
 	locationAreaURL := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s/", locationAreaName)
 	resp, err := http.Get(locationAreaURL)
 	if err != nil {
-		return exploreResponse{}, fmt.Errorf("failed to get pokemon encounters: %w", err)
+		return []byte{}, fmt.Errorf("failed to get pokemon encounters: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return exploreResponse{}, fmt.Errorf("failed to get pokemon encounters: status code %d", resp.StatusCode)
+		return []byte{}, fmt.Errorf("failed to get pokemon encounters: status code %d", resp.StatusCode)
 	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return exploreResponse{}, fmt.Errorf("failed to read response body: %w", err)
+		return []byte{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var response exploreResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return exploreResponse{}, fmt.Errorf("failed to unmarshal pokemon encounters response: %w", err)
-	}
-
-	return response, nil
+	return data, nil
 }
